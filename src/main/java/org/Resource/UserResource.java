@@ -1,18 +1,16 @@
 package org.Resource;
 
+
 import io.smallrye.mutiny.Uni;
 
 import java.util.List;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.Model.User;
 import org.Service.UserService;
+import org.bson.types.ObjectId;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,6 +23,23 @@ public class UserResource {
         return userService.list();
     }
 
+    @GET
+    @Path("/{id}")
+    public Uni<List<User>> findUserById(String id){
+        return userService.findUserById(id);
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Uni<Void> updateUser(String id, User user) {
+        user.setId(new ObjectId(id));
+        return userService.updateUser(id,user);
+    }
+    @DELETE
+    @Path("{/id}")
+    public Uni<User> deleteUserById(String id){
+        return userService.deleteUserById(id);
+    }
     @POST
     public Uni<List<User>> add(User user){
         return userService.add(user)
