@@ -31,13 +31,14 @@ public class UserResource {
 
     @PUT
     @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Uni<Void> updateUser(String id, User user) {
-        user.setId(new ObjectId(id));
-        return userService.updateUser(id,user);
+        return userService.updateUserById(id, user);
     }
     @DELETE
-    @Path("{/id}")
-    public Uni<User> deleteUserById(String id){
+    @Path("/{id}")
+    public Uni<Void> deleteUserById(@PathParam("id") String id) {
         return userService.deleteUserById(id);
     }
     @POST

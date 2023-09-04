@@ -4,7 +4,6 @@ package org.Model;
 import org.bson.types.ObjectId;
 
 public class User {
-    public ObjectId id;
 
     private String name;
     private String email;
@@ -13,20 +12,13 @@ public class User {
     public User(){
 
     }
-    public User(ObjectId id, String name, String email, String password){
-        this.id = id;
+    public User( String name, String email, String password){
         this.name = name;
         this.email = email;
         this.password = password;
     }
 
-    public ObjectId getId() {
-        return id;
-    }
 
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

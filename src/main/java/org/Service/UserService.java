@@ -5,12 +5,13 @@ import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.Multi;
+import jakarta.jws.soap.SOAPBinding;
 import org.Model.User;
 import org.bson.Document;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
-
+import static com.mongodb.client.model.Filters.eq;
 import java.util.List;
 
 @ApplicationScoped
@@ -23,7 +24,6 @@ public class UserService {
                 .find()
                 .map(document -> {
                     User user = new User();
-                    user.setId(document.getObjectId("id"));
                     user.setName(document.getString("name"));
                     user.setEmail(document.getString("email"));
                     user.setPassword(document.getString("password"));
@@ -36,42 +36,35 @@ public class UserService {
         return getCollection().find(new Document("_id", objectId))
                 .map(document -> {
                     User user = new User();
-                    user.setId(document.getObjectId("id"));
                     user.setName(document.getString("name"));
                     user.setEmail(document.getString("email"));
                     user.setPassword(document.getString("password"));
                     return user;
                 }).collect().asList();
     }
-    public Uni<User> deleteUserById(String id){
+    public Uni<Void> deleteUserById(String id) {
         ObjectId objectId = new ObjectId(id);
-        return getCollection().findOneAndDelete(new Document("_id", objectId))
-                .map(document -> {
-                    User user = new User();
-                    user.setId(document.getObjectId("id"));
-                    user.setName(document.getString("name"));
-                    user.setEmail(document.getString("email"));
-                    user.setPassword(document.getString("password"));
-                    return user;
-                });
+        return getCollection().deleteOne(new Document("_id", objectId))
+                .onItem().ignore().andContinueWithNull();
     }
 
     public Uni<Void> add(User user){
         Document document = new Document()
-                .append("id", user.getId())
                 .append("name", user.getName())
                 .append("email", user.getEmail())
                 .append("password", user.getPassword());
         return getCollection().insertOne(document)
                 .onItem().ignore().andContinueWithNull();
     }
-    public Uni<Void> updateUser(String id, User user){
+    public Uni<Void> updateUserById(String id, User updatedUser) {
         ObjectId objectId = new ObjectId(id);
-        Document updateDocument = new Document()
-                .append("name", user.getName())
-                .append("email", user.getEmail())
-                .append("password", user.getPassword());
-        return getCollection().updateOne(new Document("_id", objectId), updateDocument)
+        Document update = new Document()
+                .append("$set", new Document()
+                        .append("name", updatedUser.getName())
+                        .append("email", updatedUser.getEmail())
+                        .append("password", updatedUser.getPassword()));
+
+        return getCollection().updateOne(eq("_id", objectId), update)
                 .onItem().ignore().andContinueWithNull();
     }
     private ReactiveMongoCollection<Document> getCollection(){
